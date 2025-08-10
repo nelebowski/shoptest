@@ -126,7 +126,7 @@ def create_dbx():
 
         ############################################################
         # Создание таблицы с хранением - Данных платежных систем
-        if len(con.execute("PRAGMA table_info(storage_payments)").fetchall()) == 4:
+        if len(con.execute("PRAGMA table_info(storage_payments)").fetchall()) == 5:
             print("DB was found(3/8)")
         else:
             con.execute(
@@ -135,7 +135,8 @@ def create_dbx():
                         cryptobot_token TEXT,
                         yoomoney_token TEXT,
                         status_cryptobot TEXT,
-                        status_yoomoney TEXT
+                        status_yoomoney TEXT,
+                        status_stars TEXT
                     )
                 """)
             )
@@ -146,13 +147,15 @@ def create_dbx():
                         cryptobot_token,
                         yoomoney_token,
                         status_cryptobot,
-                        status_yoomoney
-                    ) 
-                    VALUES (?, ?, ?, ?)
+                        status_yoomoney,
+                        status_stars
+                    )
+                    VALUES (?, ?, ?, ?, ?)
                 """),
                 [
                     'None',
                     'None',
+                    'False',
                     'False',
                     'False',
                 ]

@@ -47,6 +47,8 @@ def refill_method_finl() -> InlineKeyboardMarkup:
         keyboard.row(ikb("🔷 Криптовалюта", data="user_refill_method:Cryptobot"))
     if get_payments.status_yoomoney == "True":
         keyboard.row(ikb("💳 Карта", data="user_refill_method:Yoomoney"))
+    if getattr(get_payments, 'status_stars', 'False') == "True":
+        keyboard.row(ikb("🌟 Stars", data="user_refill_method:Stars"))
 
     keyboard.row(ikb("🔙 Вернуться", data="user_profile"))
 
@@ -76,6 +78,8 @@ def refill_method_buy_finl() -> InlineKeyboardMarkup:
         keyboard.row(ikb("🔷 Криптовалюта", data="user_refill_method:Cryptobot"))
     if get_payments.status_yoomoney == "True":
         keyboard.row(ikb("💳 Карта", data="user_refill_method:Yoomoney"))
+    if getattr(get_payments, 'status_stars', 'False') == "True":
+        keyboard.row(ikb("🌟 Stars", data="user_refill_method:Stars"))
 
     keyboard.row(ikb("❌ Закрыть", data="close_this"))
 

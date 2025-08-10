@@ -31,7 +31,7 @@ def payments_frep() -> ReplyKeyboardMarkup:
     keyboard = ReplyKeyboardBuilder()
 
     keyboard.row(
-        rkb("🔷 CryptoBot"), rkb("🔮 ЮMoney"),
+        rkb("🔷 CryptoBot"), rkb("🔮 ЮMoney"), rkb("🌟 Telegram Stars"),
     ).row(
         rkb("🔙 Главное меню"),
     )
