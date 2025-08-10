@@ -84,7 +84,7 @@ async def refill_amount_get(message: Message, bot: Bot, state: FSM, arSession: A
             chat_id=message.from_user.id,
             title="Пополнение баланса",
             description=ded(f"Сумма пополнения: {pay_amount}₽ (~{stars_amount}⭐)\n1⭐ = 1.3₽"),
-            payload=f"refill:{pay_receipt}",
+            payload=f"refill:{pay_receipt}:{pay_amount}",
             provider_token="",
             currency="XTR",
             prices=[LabeledPrice(label="Пополнение", amount=stars_amount)],
@@ -269,9 +269,8 @@ async def refill_stars_success(message: Message, bot: Bot, state: FSM, arSession
     if not payload.startswith("refill:"):
         return
 
-    pay_receipt = payload.split(":")[1]
-    stars_amount = message.successful_payment.total_amount
-    pay_amount = int(stars_amount * 1.3)
+    _, pay_receipt, pay_amount_str = payload.split(":")
+    pay_amount = int(pay_amount_str)
 
     await refill_success_message(
         bot=bot,
