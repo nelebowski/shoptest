@@ -1,4 +1,4 @@
-# - *- coding: utf- 8 - *-
+# -*- coding: utf-8 -*-
 from typing import Union
 
 from aiogram import Router, Bot, F
@@ -269,7 +269,10 @@ async def refill_stars_success(message: Message, bot: Bot, state: FSM, arSession
     if not payload.startswith("refill:"):
         return
 
-    _, pay_receipt, pay_amount_str = payload.split(":")
+    parts = payload.split(":", 2)
+    if len(parts) != 3:
+        return
+    _, pay_receipt, pay_amount_str = parts
     pay_amount = int(pay_amount_str)
 
     await refill_success_message(
