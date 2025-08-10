@@ -94,7 +94,11 @@ async def user_buy_open(call: CallbackQuery, bot: Bot, state: FSM, arSession: AR
 
     # Проверка, имеется ли на балансе пользователя достаточно средств
     if int(get_user.user_balance) < int(get_position.position_price):
-        if get_payments.status_cryptobot == "True" or get_payments.status_yoomoney == "True":
+        if (
+            get_payments.status_cryptobot == "True"
+            or get_payments.status_yoomoney == "True"
+            or getattr(get_payments, 'status_stars', 'False') == "True"
+        ):
             await call.message.answer(
                 "<b>❗ На вашем счёте недостаточно средств</b>\n"
                 "💰 Выберите способ пополнения баланса",
