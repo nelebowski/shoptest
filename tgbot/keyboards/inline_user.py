@@ -80,6 +80,26 @@ def refill_bill_finl(pay_link: str, pay_receipt: Union[str, int], pay_method: st
     return keyboard.as_markup()
 
 
+def order_bill_finl(
+    pay_link: str,
+    pay_receipt: Union[str, int],
+    pay_method: str,
+    server: int,
+    account: str,
+    amount: int,
+    pay_amount: int,
+) -> InlineKeyboardMarkup:
+    keyboard = InlineKeyboardBuilder()
+    keyboard.row(ikb("🌀 Перейти к оплате", url=pay_link)).row(
+        ikb(
+            "🔄 Проверить оплату",
+            data=f"OrderPay:{pay_method}:{pay_receipt}:{server}:{account}:{amount}:{pay_amount}",
+        )
+    )
+    keyboard.row(ikb("🔙 Назад", data="buy_currency"))
+    return keyboard.as_markup()
+
+
 # Выбор способа пополнения при нехватке баланс во время покупки товара
 def refill_method_buy_finl() -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardBuilder()
