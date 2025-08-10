@@ -13,6 +13,7 @@ class PaymentsModel(BaseModel):
     yoomoney_token: str  # Юмани токен
     status_cryptobot: str  # Статус работы криптобота
     status_yoomoney: str  # Статус работы юмани
+    status_stars: str = 'False'  # Статус пополнения звездочками
 
 
 # Работа с платежными системами

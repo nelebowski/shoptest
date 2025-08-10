@@ -19,6 +19,20 @@ def close_finl() -> InlineKeyboardMarkup:
     return keyboard.as_markup()
 
 
+# Главное меню админ панели
+def admin_menu_finl() -> InlineKeyboardMarkup:
+    keyboard = InlineKeyboardBuilder()
+
+    keyboard.row(ikb("🔑 Платежные системы", data="admin_menu:payments"))
+    keyboard.row(ikb("⚙️ Настройки", data="admin_menu:settings"))
+    keyboard.row(ikb("🔆 Общие функции", data="admin_menu:functions"))
+    keyboard.row(ikb("🎁 Управление товарами", data="admin_menu:products"))
+    keyboard.row(ikb("📊 Статистика", data="admin_menu:stats"))
+    keyboard.row(ikb("🔙 Главное меню", data="main_menu"))
+
+    return keyboard.as_markup()
+
+
 # Рассылка
 def mail_confirm_finl() -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardBuilder()
@@ -117,6 +131,24 @@ def payment_cryptobot_finl() -> InlineKeyboardMarkup:
     ).row(
         ikb("⁠", data="..."),
     ).row(
+        status_kb,
+    )
+
+    return keyboard.as_markup()
+
+
+# Управление - Telegram Stars
+def payment_stars_finl() -> InlineKeyboardMarkup:
+    keyboard = InlineKeyboardBuilder()
+
+    get_payments = Paymentsx.get()
+
+    if getattr(get_payments, 'status_stars', 'False') == "True":
+        status_kb = ikb("Статус: Включено ✅", data="payment_stars_status:False")
+    else:
+        status_kb = ikb("Статус: Выключено ❌", data="payment_stars_status:True")
+
+    keyboard.row(
         status_kb,
     )
 

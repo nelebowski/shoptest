@@ -32,7 +32,7 @@ async def open_profile_user(bot: Bot, user_id: Union[int, str]):
         <b>👤 Ваш профиль</b>
         ➖➖➖➖➖➖➖➖➖➖
         🆔 ID: <code>{get_user.user_id}</code>
-        💰 Баланс: <code>{get_user.user_balance}₽</code>
+        💰 Баланс: <code>{int(get_user.user_balance)}₽</code>
         🎁 Куплено товаров: <code>{count_items}шт</code>
 
         🕰 Регистрация: <code>{convert_date(get_user.user_unix, False, False)} ({convert_day(how_days)})</code>
@@ -61,7 +61,7 @@ async def position_open_user(bot: Bot, user_id: int, position_id: Union[str, int
         ➖➖➖➖➖➖➖➖➖➖
         ▪️ Название: <code>{get_position.position_name}</code>
         ▪️ Категория: <code>{get_category.category_name}</code>
-        ▪️ Стоимость: <code>{get_position.position_price}₽</code>
+        ▪️ Стоимость: <code>{int(get_position.position_price)}₽</code>
         ▪️ Количество: <code>{len(get_items)}шт</code>
         {text_desc}
     """)
@@ -94,9 +94,9 @@ async def open_profile_admin(bot: Bot, user_id: int, get_user: UserModel):
         ▪️ Имя: <a href='tg://user?id={get_user.user_id}'>{get_user.user_name}</a>
         ▪️ Регистрация: <code>{convert_date(get_user.user_unix, False, False)} ({convert_day(how_days)})</code>
 
-        ▪️ Баланс: <code>{get_user.user_balance}₽</code>
-        ▪️ Всего выдано: <code>{get_user.user_give}₽</code>
-        ▪️ Всего пополнено: <code>{get_user.user_refill}₽</code>
+        ▪️ Баланс: <code>{int(get_user.user_balance)}₽</code>
+        ▪️ Всего выдано: <code>{int(get_user.user_give)}₽</code>
+        ▪️ Всего пополнено: <code>{int(get_user.user_refill)}₽</code>
         ▪️ Куплено товаров: <code>{count_items}шт</code>
     """)
 
@@ -124,7 +124,7 @@ async def refill_open_admin(bot: Bot, user_id: int, get_refill: RefillModel):
         <b>🧾 Чек: <code>#{get_refill.refill_receipt}</code></b>
         ➖➖➖➖➖➖➖➖➖➖
         ▪️ Пользователь: <a href='tg://user?id={get_user.user_id}'>{get_user.user_name}</a> | <code>{get_user.user_id}</code>
-        ▪️ Сумма пополнения: <code>{get_refill.refill_amount}₽</code>
+        ▪️ Сумма пополнения: <code>{int(get_refill.refill_amount)}₽</code>
         ▪️ Способ пополнения: <code>{pay_method}</code>
         ▪️ Комментарий: <code>{get_refill.refill_comment}</code>
         ▪️ Дата пополнения: <code>{convert_date(get_refill.refill_unix)}</code>
@@ -151,11 +151,11 @@ async def purchase_open_admin(bot: Bot, arSession: ARS, user_id: int, get_purcha
 
         ▪️ Название товара: <code>{get_purchase.purchase_position_name}</code>
         ▪️ Куплено товаров: <code>{get_purchase.purchase_count}шт</code>
-        ▪️ Цена одного товара: <code>{get_purchase.purchase_price_one}₽</code>
-        ▪️ Сумма покупки: <code>{get_purchase.purchase_price}₽</code>
+        ▪️ Цена одного товара: <code>{int(get_purchase.purchase_price_one)}₽</code>
+        ▪️ Сумма покупки: <code>{int(get_purchase.purchase_price)}₽</code>
 
-        ▪️ Баланс до покупки: <code>{get_purchase.user_balance_before}₽</code>
-        ▪️ Баланс после покупки: <code>{get_purchase.user_balance_after}₽</code>
+        ▪️ Баланс до покупки: <code>{int(get_purchase.user_balance_before)}₽</code>
+        ▪️ Баланс после покупки: <code>{int(get_purchase.user_balance_after)}₽</code>
 
         ▪️ Товары: <a href='{link_items}'>кликабельно</a>
         ▪️ Дата покупки: <code>{convert_date(get_purchase.purchase_unix)}</code>
@@ -201,10 +201,10 @@ async def category_open_admin(bot: Bot, user_id: int, category_id: Union[str, in
         ▪️ Кол-во товаров: <code>{len(get_items)}шт</code>
         ▪️ Дата создания: <code>{convert_date(get_category.category_unix)}шт</code>
         
-        💸 Продаж за День: <code>{profit_count_day}шт</code> - <code>{profit_amount_day}₽</code>
-        💸 Продаж за Неделю: <code>{profit_count_week}шт</code> - <code>{profit_amount_week}₽</code>
-        💸 Продаж за Месяц: <code>{profit_count_month}шт</code> - <code>{profit_amount_month}₽</code>
-        💸 Продаж за Всё время: <code>{profit_count_all}шт</code> - <code>{profit_amount_all}₽</code>
+        💸 Продаж за День: <code>{profit_count_day}шт</code> - <code>{int(profit_amount_day)}₽</code>
+        💸 Продаж за Неделю: <code>{profit_count_week}шт</code> - <code>{int(profit_amount_week)}₽</code>
+        💸 Продаж за Месяц: <code>{profit_count_month}шт</code> - <code>{int(profit_amount_month)}₽</code>
+        💸 Продаж за Всё время: <code>{profit_count_all}шт</code> - <code>{int(profit_amount_all)}₽</code>
     """)
 
     await bot.send_message(
@@ -255,16 +255,16 @@ async def position_open_admin(bot: Bot, user_id: int, position_id: Union[str, in
         ➖➖➖➖➖➖➖➖➖➖
         ▪️ Категория: <code>{get_category.category_name}</code>
         ▪️ Позиция: <code>{get_position.position_name}</code>
-        ▪️ Стоимость: <code>{get_position.position_price}₽</code>
+        ▪️ Стоимость: <code>{int(get_position.position_price)}₽</code>
         ▪️ Количество: <code>{len(get_items)}шт</code>
         ▪️ Изображение: {position_photo_text}
         ▪️ Дата создания: <code>{convert_date(get_category.category_unix)}</code>
         ▪️ Описание: {position_desc}
 
-        💸 Продаж за День: <code>{profit_count_day}шт</code> - <code>{profit_amount_day}₽</code>
-        💸 Продаж за Неделю: <code>{profit_count_week}шт</code> - <code>{profit_amount_week}₽</code>
-        💸 Продаж за Месяц: <code>{profit_count_month}шт</code> - <code>{profit_amount_month}₽</code>
-        💸 Продаж за Всё время: <code>{profit_count_all}шт</code> - <code>{profit_amount_all}₽</code>
+        💸 Продаж за День: <code>{profit_count_day}шт</code> - <code>{int(profit_amount_day)}₽</code>
+        💸 Продаж за Неделю: <code>{profit_count_week}шт</code> - <code>{int(profit_amount_week)}₽</code>
+        💸 Продаж за Месяц: <code>{profit_count_month}шт</code> - <code>{int(profit_amount_month)}₽</code>
+        💸 Продаж за Всё время: <code>{profit_count_all}шт</code> - <code>{int(profit_amount_all)}₽</code>
     """)
 
     await bot.send_message(
@@ -403,24 +403,24 @@ def get_statistics() -> str:
 
         <b>💰 Средства</b>
         ┣‒ Продажи (кол-во, сумма)
-        ┣ За День: <code>{profit_count_day}шт</code> - <code>{profit_amount_day}₽</code>
-        ┣ За Неделю: <code>{profit_count_week}шт</code> - <code>{profit_amount_week}₽</code>
-        ┣ За Месяц: <code>{profit_count_month}шт</code> - <code>{profit_amount_month}₽</code>
-        ┣ За Всё время: <code>{profit_count_all}шт</code> - <code>{profit_amount_all}₽</code>
+        ┣ За День: <code>{profit_count_day}шт</code> - <code>{int(profit_amount_day)}₽</code>
+        ┣ За Неделю: <code>{profit_count_week}шт</code> - <code>{int(profit_amount_week)}₽</code>
+        ┣ За Месяц: <code>{profit_count_month}шт</code> - <code>{int(profit_amount_month)}₽</code>
+        ┣ За Всё время: <code>{profit_count_all}шт</code> - <code>{int(profit_amount_all)}₽</code>
         ┃
         ┣‒ Пополнения (кол-во, сумма)
-        ┣ За День: <code>{refill_count_day}шт</code> - <code>{refill_amount_day}₽</code>
-        ┣ За Неделю: <code>{refill_count_week}шт</code> - <code>{refill_amount_week}₽</code>
-        ┣ За Месяц: <code>{refill_count_month}шт</code> - <code>{refill_amount_month}₽</code>
-        ┣ За Всё время: <code>{refill_count_all}шт</code> - <code>{refill_amount_all}₽</code>
+        ┣ За День: <code>{refill_count_day}шт</code> - <code>{int(refill_amount_day)}₽</code>
+        ┣ За Неделю: <code>{refill_count_week}шт</code> - <code>{int(refill_amount_week)}₽</code>
+        ┣ За Месяц: <code>{refill_count_month}шт</code> - <code>{int(refill_amount_month)}₽</code>
+        ┣ За Всё время: <code>{refill_count_all}шт</code> - <code>{int(refill_amount_all)}₽</code>
         ┃
         ┣‒ Платежные системы (всего)
-        ┣ ЮMoney: <code>{refill_yoomoney_count}шт</code> - <code>{refill_yoomoney_amount}₽</code>
-        ┣ CryptoBot: <code>{refill_cryptobot_count}шт</code> - <code>{refill_cryptobot_amount}₽</code>
+        ┣ ЮMoney: <code>{refill_yoomoney_count}шт</code> - <code>{int(refill_yoomoney_amount)}₽</code>
+        ┣ CryptoBot: <code>{refill_cryptobot_count}шт</code> - <code>{int(refill_cryptobot_amount)}₽</code>
         ┃
         ┣‒ Остальные
-        ┣ Средств выдано: <code>{users_money_give}₽</code>
-        ┗ Средств в системе: <code>{users_money_have}₽</code>
+        ┣ Средств выдано: <code>{int(users_money_give)}₽</code>
+        ┗ Средств в системе: <code>{int(users_money_have)}₽</code>
 
         <b>🎁 Товары</b>
         ┣ Товаров: <code>{len(get_items)}шт</code>

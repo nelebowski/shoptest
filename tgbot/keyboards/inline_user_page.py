@@ -49,7 +49,7 @@ def prod_item_position_swipe_fp(remover: int, category_id: int) -> InlineKeyboar
 
             keyboard.row(
                 ikb(
-                    f"{position.position_name} | {position.position_price}₽ | {len(get_items)} шт",
+                    f"{position.position_name} | {int(position.position_price)}₽ | {len(get_items)} шт",
                     data=f"buy_position_open:{position.position_id}:{remover}",
                 )
             )
@@ -94,5 +94,33 @@ def prod_available_swipe_fp(remover_now: int, remover_max: int) -> InlineKeyboar
             )
 
         keyboard.adjust(5)
+
+    return keyboard.as_markup()
+
+
+################################################################################
+############################## СПИСОК СЕРВЕРОВ ################################
+def buy_servers_swipe_fp(page: int) -> InlineKeyboardMarkup:
+    keyboard = InlineKeyboardBuilder()
+
+    servers = list(range(1, 90))
+    per_page = 24
+    start = page * per_page
+    end = min(len(servers), start + per_page)
+
+    for server in servers[start:end]:
+        keyboard.button(text=f"Сервер {server}", callback_data=f"select_server:{server}")
+
+    keyboard.adjust(3)
+
+    nav = []
+    if page > 0:
+        nav.append(ikb("⬅️", data=f"servers_page:{page - 1}"))
+    if end < len(servers):
+        nav.append(ikb("➡️", data=f"servers_page:{page + 1}"))
+    if nav:
+        keyboard.row(*nav)
+
+    keyboard.row(ikb("🔙 Назад", data="main_menu"))
 
     return keyboard.as_markup()
