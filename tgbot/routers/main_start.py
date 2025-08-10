@@ -28,6 +28,7 @@ prohibit_refill = [
     'user_refill_method',
     'Pay:Cryptobot',
     'Pay:Yoomoney',
+    'Pay:Stars',
     'Pay:',
 ]
 

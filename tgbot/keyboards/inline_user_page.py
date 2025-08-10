@@ -49,7 +49,7 @@ def prod_item_position_swipe_fp(remover: int, category_id: int) -> InlineKeyboar
 
             keyboard.row(
                 ikb(
-                    f"{position.position_name} | {position.position_price}₽ | {len(get_items)} шт",
+                    f"{position.position_name} | {int(position.position_price)}₽ | {len(get_items)} шт",
                     data=f"buy_position_open:{position.position_id}:{remover}",
                 )
             )

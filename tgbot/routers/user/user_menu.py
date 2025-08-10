@@ -107,7 +107,7 @@ async def user_purchases(call: CallbackQuery, bot: Bot, state: FSM, arSession: A
             await call.message.answer(
                 ded(f"""
                     <b>🧾 Чек: <code>#{purchase.purchase_receipt}</code></b>
-                    ▪️ Товар: <code>{purchase.purchase_position_name} | {purchase.purchase_count}шт | {purchase.purchase_price}₽</code>
+                    ▪️ Товар: <code>{purchase.purchase_position_name} | {purchase.purchase_count}шт | {int(purchase.purchase_price)}₽</code>
                     ▪️ Дата покупки: <code>{convert_date(purchase.purchase_unix)}</code>
                     ▪️ Товары: <a href='{link_items}'>кликабельно</a>
                 """)

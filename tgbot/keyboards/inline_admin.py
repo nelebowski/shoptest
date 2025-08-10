@@ -123,6 +123,24 @@ def payment_cryptobot_finl() -> InlineKeyboardMarkup:
     return keyboard.as_markup()
 
 
+# Управление - Telegram Stars
+def payment_stars_finl() -> InlineKeyboardMarkup:
+    keyboard = InlineKeyboardBuilder()
+
+    get_payments = Paymentsx.get()
+
+    if getattr(get_payments, 'status_stars', 'False') == "True":
+        status_kb = ikb("Статус: Включено ✅", data="payment_stars_status:False")
+    else:
+        status_kb = ikb("Статус: Выключено ❌", data="payment_stars_status:True")
+
+    keyboard.row(
+        status_kb,
+    )
+
+    return keyboard.as_markup()
+
+
 ################################################################################
 ################################## НАСТРОЙКИ ###################################
 # Основные настройки

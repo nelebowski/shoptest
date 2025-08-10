@@ -152,7 +152,7 @@ async def functions_user_purchases(call: CallbackQuery, bot: Bot, state: FSM, ar
         await call.message.answer(
             ded(f"""
                 <b>🧾 Чек: <code>#{purchase.purchase_receipt}</code></b>
-                🎁 Товар: <code>{purchase.purchase_position_name} | {purchase.purchase_count}шт | {purchase.purchase_price}₽</code>
+                🎁 Товар: <code>{purchase.purchase_position_name} | {purchase.purchase_count}шт | {int(purchase.purchase_price)}₽</code>
                 🕰 Дата покупки: <code>{convert_date(purchase.purchase_unix)}</code>
                 🔗 Товары: <a href='{link_items}'>кликабельно</a>
             """)
@@ -189,7 +189,7 @@ async def functions_user_balance_add_get(message: Message, bot: Bot, state: FSM,
             reply_markup=profile_edit_return_finl(user_id),
         )
 
-    get_amount = to_number(message.text)
+    get_amount = int(to_number(message.text))
 
     if get_amount <= 0 or get_amount > 1_000_000_000:
         return await message.answer(
@@ -203,8 +203,8 @@ async def functions_user_balance_add_get(message: Message, bot: Bot, state: FSM,
     get_user = Userx.get(user_id=user_id)
     Userx.update(
         user_id,
-        user_balance=round(get_user.user_balance + get_amount, 2),
-        user_give=round(get_user.user_give + get_amount, 2),
+        user_balance=int(get_user.user_balance) + get_amount,
+        user_give=int(get_user.user_give) + get_amount,
     )
 
     try:
@@ -217,7 +217,7 @@ async def functions_user_balance_add_get(message: Message, bot: Bot, state: FSM,
 
     await message.answer(
         f"👤 Пользователь: <a href='tg://user?id={get_user.user_id}'>{get_user.user_name}</a>\n"
-        f"💰 Выдача баланса: <code>{message.text}₽</code> | <code>{get_user.user_balance}</code> -> <code>{round(get_user.user_balance + get_amount, 2)}₽</code>"
+        f"💰 Выдача баланса: <code>{message.text}₽</code> | <code>{int(get_user.user_balance)}</code> -> <code>{int(get_user.user_balance) + get_amount}₽</code>"
     )
 
     get_user = Userx.get(user_id=user_id)
@@ -250,7 +250,7 @@ async def functions_user_balance_set_get(message: Message, bot: Bot, state: FSM,
             reply_markup=profile_edit_return_finl(user_id),
         )
 
-    get_amount = to_number(message.text)
+    get_amount = int(to_number(message.text))
 
     if get_amount < -1_000_000_000 or get_amount > 1_000_000_000:
         return await message.answer(
@@ -263,20 +263,20 @@ async def functions_user_balance_set_get(message: Message, bot: Bot, state: FSM,
 
     get_user = Userx.get(user_id=user_id)
 
-    if get_amount > get_user.user_balance:
-        user_give = get_amount - get_user.user_give
+    if get_amount > int(get_user.user_balance):
+        user_give = get_amount - int(get_user.user_give)
     else:
         user_give = 0
 
     Userx.update(
         user_id,
         user_balance=get_amount,
-        user_give=round(get_user.user_give + user_give, 2),
+        user_give=int(get_user.user_give) + user_give,
     )
 
     await message.answer(
         f"👤 Пользователь: <a href='tg://user?id={get_user.user_id}'>{get_user.user_name}</a>\n"
-        f"💰 Установка баланса: <code>{message.text}₽</code> | <code>{get_user.user_balance}</code> -> <code>{get_amount}₽</code>"
+        f"💰 Установка баланса: <code>{message.text}₽</code> | <code>{int(get_user.user_balance)}</code> -> <code>{get_amount}₽</code>"
     )
 
     get_user = Userx.get(user_id=user_id)
