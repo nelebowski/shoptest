@@ -1,9 +1,10 @@
-# - *- coding: utf- 8 - *-
+# -*- coding: utf-8 -*-
 from typing import Union
 
 from aiogram import Router, Bot, F
 from aiogram.filters import StateFilter
-from aiogram.types import CallbackQuery, Message
+from aiogram.types import CallbackQuery, Message, PreCheckoutQuery, LabeledPrice
+import math
 
 from tgbot.database import Paymentsx, Refillx, Userx
 from tgbot.keyboards.inline_user import refill_bill_finl, refill_method_finl
@@ -23,7 +24,11 @@ router = Router(name=__name__)
 async def refill_method(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
     get_payment = Paymentsx.get()
 
-    if get_payment.status_cryptobot == "False" and get_payment.status_yoomoney == "False":
+    if (
+        get_payment.status_cryptobot == "False"
+        and get_payment.status_yoomoney == "False"
+        and getattr(get_payment, 'status_stars', 'False') == "False"
+    ):
         return await call.answer("❗️ Пополнения временно недоступны", True)
 
     await call.message.edit_text(
@@ -66,13 +71,26 @@ async def refill_amount_get(message: Message, bot: Bot, state: FSM, arSession: A
         )
 
     cache_message = await message.answer("<b>♻️ Подождите, платёж генерируется..</b>")
-
-    pay_amount = to_number(message.text)
+    pay_amount = int(to_number(message.text))
     pay_method = (await state.get_data())['here_refill_method']
     await state.clear()
 
     # Генерация платежа
-    if pay_method == "Cryptobot":
+    if pay_method == "Stars":
+        stars_amount = math.ceil(pay_amount / 1.3)
+        pay_receipt = gen_id(10)
+        await cache_message.delete()
+        await bot.send_invoice(
+            chat_id=message.from_user.id,
+            title="Пополнение баланса",
+            description=ded(f"Сумма пополнения: {pay_amount}₽ (~{stars_amount}⭐)\n1⭐ = 1.3₽"),
+            payload=f"refill:{pay_receipt}:{pay_amount}",
+            provider_token="",
+            currency="XTR",
+            prices=[LabeledPrice(label="Пополнение", amount=stars_amount)],
+        )
+        return
+    elif pay_method == "Cryptobot":
         bill_message, bill_link, bill_receipt = await (
             CryptobotAPI(
                 bot=bot,
@@ -206,6 +224,8 @@ async def refill_success(
     else:
         text_method = f"Unknown - {pay_method}"
 
+    pay_amount = int(pay_amount)
+
     Refillx.add(
         user_id=get_user.user_id,
         refill_comment=pay_comment,
@@ -216,8 +236,8 @@ async def refill_success(
 
     Userx.update(
         call.from_user.id,
-        user_balance=round(get_user.user_balance + pay_amount, 2),
-        user_refill=round(get_user.user_refill + pay_amount, 2),
+        user_balance=int(get_user.user_balance) + pay_amount,
+        user_refill=int(get_user.user_refill) + pay_amount,
     )
 
     await call.message.edit_text(
@@ -234,4 +254,125 @@ async def refill_success(
             💰 Сумма пополнения: <code>{pay_amount}₽</code> <code>({text_method})</code>
             🧾 Чек: <code>#{pay_receipt}</code>
         """)
+    )
+
+# Подтверждение оплаты Telegram Stars
+@router.pre_checkout_query()
+async def stars_pre_checkout(pre_checkout_query: PreCheckoutQuery, bot: Bot, state: FSM, arSession: ARS):
+    await bot.answer_pre_checkout_query(pre_checkout_query.id, ok=True)
+
+
+# Успешная оплата Telegram Stars
+@router.message(F.successful_payment)
+async def refill_stars_success(message: Message, bot: Bot, state: FSM, arSession: ARS):
+    payload = message.successful_payment.invoice_payload
+    if payload.startswith("refill:"):
+        parts = payload.split(":", 2)
+        if len(parts) != 3:
+            return
+        _, pay_receipt, pay_amount_str = parts
+        pay_amount = int(pay_amount_str)
+        await refill_success_message(
+            bot=bot,
+            message=message,
+            pay_amount=pay_amount,
+            pay_receipt=pay_receipt,
+        )
+    elif payload.startswith("buy:"):
+        parts = payload.split(":", 5)
+        if len(parts) != 6:
+            return
+        _, pay_receipt, server, account, amount, pay_amount_str = parts
+        pay_amount = int(pay_amount_str)
+        await buy_success_message(
+            bot=bot,
+            message=message,
+            pay_amount=pay_amount,
+            pay_receipt=pay_receipt,
+            server=server,
+            account=account,
+            amount=amount,
+        )
+
+
+# Зачисление средств после оплаты звёздами
+async def refill_success_message(
+        bot: Bot,
+        message: Message,
+        pay_amount: float,
+        pay_receipt: str,
+):
+    get_user = Userx.get(user_id=message.from_user.id)
+
+    pay_amount = int(pay_amount)
+
+    Refillx.add(
+        user_id=get_user.user_id,
+        refill_comment=pay_receipt,
+        refill_amount=pay_amount,
+        refill_receipt=pay_receipt,
+        refill_method="Stars",
+    )
+
+    Userx.update(
+        message.from_user.id,
+        user_balance=int(get_user.user_balance) + pay_amount,
+        user_refill=int(get_user.user_refill) + pay_amount,
+    )
+
+    await message.answer(
+        ded(f"""
+            <b>💰 Вы пополнили баланс на сумму <code>{pay_amount}₽</code>. Удачи ❤️
+            🧾 Чек: <code>#{pay_receipt}</code></b>
+        """),
+    )
+
+    await send_admins(
+        bot,
+        ded(f"""
+            👤 Пользователь: <b>@{get_user.user_login}</b> | <a href='tg://user?id={get_user.user_id}'>{get_user.user_name}</a> | <code>{get_user.user_id}</code>
+            💰 Сумма пополнения: <code>{pay_amount}₽</code> <code>(Telegram Stars)</code>
+            🧾 Чек: <code>#{pay_receipt}</code>
+        """),
+    )
+
+
+async def buy_success_message(
+        bot: Bot,
+        message: Message,
+        pay_amount: int,
+        pay_receipt: str,
+        server: str,
+        account: str,
+        amount: str,
+):
+    get_user = Userx.get(user_id=message.from_user.id)
+    amount_int = int(amount)
+
+    await message.answer(
+        ded(
+            f"""
+            <b>Заказ принят!</b>
+            Сервер: {server}
+            Счёт: {account}
+            Кол-во валюты: {amount_int} млн
+            Сумма: {pay_amount}₽
+            🧾 Чек: <code>#{pay_receipt}</code>
+            Ожидайте вирты в течение 5-10 минут.
+            """
+        )
+    )
+
+    await send_admins(
+        bot,
+        ded(
+            f"""
+            👤 Пользователь: <b>@{get_user.user_login}</b> | <a href='tg://user?id={get_user.user_id}'>{get_user.user_name}</a> | <code>{get_user.user_id}</code>
+            🕹 Сервер: {server}
+            🎮 Счёт: {account}
+            💰 Кол-во валюты: {amount_int} млн
+            💵 Сумма: {pay_amount}₽ (Telegram Stars)
+            🧾 Чек: <code>#{pay_receipt}</code>
+            """
+        ),
     )

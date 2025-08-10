@@ -22,6 +22,18 @@ def user_profile_finl() -> InlineKeyboardMarkup:
     return keyboard.as_markup()
 
 
+
+def start_menu_finl() -> InlineKeyboardMarkup:
+    keyboard = InlineKeyboardBuilder()
+
+    keyboard.row(ikb("Купить вирты", data="buy_currency"))
+    keyboard.row(ikb("Мои покупки", data="user_purchases"))
+    keyboard.row(ikb("Отзывы", data="user_reviews"))
+    keyboard.row(ikb("Поддержка", data="support_chat"))
+
+    return keyboard.as_markup()
+
+
 def user_support_finl(support_login: str) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardBuilder()
 
@@ -47,6 +59,8 @@ def refill_method_finl() -> InlineKeyboardMarkup:
         keyboard.row(ikb("🔷 Криптовалюта", data="user_refill_method:Cryptobot"))
     if get_payments.status_yoomoney == "True":
         keyboard.row(ikb("💳 Карта", data="user_refill_method:Yoomoney"))
+    if getattr(get_payments, 'status_stars', 'False') == "True":
+        keyboard.row(ikb("🌟 Stars", data="user_refill_method:Stars"))
 
     keyboard.row(ikb("🔙 Вернуться", data="user_profile"))
 
@@ -66,6 +80,26 @@ def refill_bill_finl(pay_link: str, pay_receipt: Union[str, int], pay_method: st
     return keyboard.as_markup()
 
 
+def order_bill_finl(
+    pay_link: str,
+    pay_receipt: Union[str, int],
+    pay_method: str,
+    server: int,
+    account: str,
+    amount: int,
+    pay_amount: int,
+) -> InlineKeyboardMarkup:
+    keyboard = InlineKeyboardBuilder()
+    keyboard.row(ikb("🌀 Перейти к оплате", url=pay_link)).row(
+        ikb(
+            "🔄 Проверить оплату",
+            data=f"OrderPay:{pay_method}:{pay_receipt}:{server}:{account}:{amount}:{pay_amount}",
+        )
+    )
+    keyboard.row(ikb("🔙 Назад", data="buy_currency"))
+    return keyboard.as_markup()
+
+
 # Выбор способа пополнения при нехватке баланс во время покупки товара
 def refill_method_buy_finl() -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardBuilder()
@@ -76,7 +110,26 @@ def refill_method_buy_finl() -> InlineKeyboardMarkup:
         keyboard.row(ikb("🔷 Криптовалюта", data="user_refill_method:Cryptobot"))
     if get_payments.status_yoomoney == "True":
         keyboard.row(ikb("💳 Карта", data="user_refill_method:Yoomoney"))
+    if getattr(get_payments, 'status_stars', 'False') == "True":
+        keyboard.row(ikb("🌟 Stars", data="user_refill_method:Stars"))
 
     keyboard.row(ikb("❌ Закрыть", data="close_this"))
+
+    return keyboard.as_markup()
+
+
+def order_pay_method_finl() -> InlineKeyboardMarkup:
+    keyboard = InlineKeyboardBuilder()
+
+    get_payments = Paymentsx.get()
+
+    if get_payments.status_cryptobot == "True":
+        keyboard.row(ikb("🔷 CryptoBot", data="order_pay:Cryptobot"))
+    if get_payments.status_yoomoney == "True":
+        keyboard.row(ikb("🔮 ЮMoney", data="order_pay:Yoomoney"))
+    if getattr(get_payments, 'status_stars', 'False') == "True":
+        keyboard.row(ikb("🌟 Stars", data="order_pay:Stars"))
+
+    keyboard.row(ikb("🔙 Назад", data="main_menu"))
 
     return keyboard.as_markup()

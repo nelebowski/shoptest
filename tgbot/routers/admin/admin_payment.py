@@ -4,7 +4,7 @@ from aiogram.filters import StateFilter
 from aiogram.types import CallbackQuery, Message
 
 from tgbot.database import Paymentsx
-from tgbot.keyboards.inline_admin import payment_yoomoney_finl, close_finl, payment_cryptobot_finl
+from tgbot.keyboards.inline_admin import payment_yoomoney_finl, close_finl, payment_cryptobot_finl, payment_stars_finl
 from tgbot.services.api_cryptobot import CryptobotAPI
 from tgbot.services.api_yoomoney import YoomoneyAPI
 from tgbot.utils.const_functions import ded
@@ -32,6 +32,17 @@ async def payment_yoomoney_open(message: Message, bot: Bot, state: FSM, arSessio
     await message.answer(
         "<b>🔮 Управление - ЮMoney</b>",
         reply_markup=payment_yoomoney_finl(),
+    )
+
+
+# Управление - Telegram Stars
+@router.message(F.text == "🌟 Telegram Stars")
+async def payment_stars_open(message: Message, bot: Bot, state: FSM, arSession: ARS):
+    await state.clear()
+
+    await message.answer(
+        "<b>🌟 Управление - Telegram Stars</b>",
+        reply_markup=payment_stars_finl(),
     )
 
 
@@ -98,6 +109,19 @@ async def payment_cryptobot_status(call: CallbackQuery, bot: Bot, state: FSM, ar
     await call.message.edit_text(
         "<b>🔷 Управление - CryptoBot</b>",
         reply_markup=payment_cryptobot_finl(),
+    )
+
+
+# Выключатель - Telegram Stars
+@router.callback_query(F.data.startswith("payment_stars_status:"))
+async def payment_stars_status(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
+    get_status = call.data.split(":")[1]
+
+    Paymentsx.update(status_stars=get_status)
+
+    await call.message.edit_text(
+        "<b>🌟 Управление - Telegram Stars</b>",
+        reply_markup=payment_stars_finl(),
     )
 
 

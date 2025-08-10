@@ -4,9 +4,8 @@ from aiogram.filters import StateFilter
 from aiogram.types import Message, CallbackQuery
 
 from tgbot.database import Settingsx, Positionx, Categoryx
-from tgbot.keyboards.inline_user import user_support_finl
+from tgbot.keyboards.inline_user import user_support_finl, start_menu_finl
 from tgbot.keyboards.inline_user_page import prod_item_position_swipe_fp
-from tgbot.keyboards.reply_main import menu_frep
 from tgbot.utils.const_functions import ded
 from tgbot.utils.misc.bot_filters import IsBuy, IsRefill, IsWork
 from tgbot.utils.misc.bot_models import FSM, ARS
@@ -28,6 +27,7 @@ prohibit_refill = [
     'user_refill_method',
     'Pay:Cryptobot',
     'Pay:Yoomoney',
+    'Pay:Stars',
     'Pay:',
 ]
 
@@ -108,9 +108,24 @@ async def main_start(message: Message, bot: Bot, state: FSM, arSession: ARS):
         ded("""
             *🐻 Lebowski Store*
             *🔸 Если не появилось меню*
-            *🔸 Введите /start*
+            *🔸 Используйте кнопки ниже*
         """),
-        reply_markup=menu_frep(message.from_user.id),
+        reply_markup=start_menu_finl(),
+        parse_mode="MarkdownV2"
+    )
+
+
+@router.callback_query(F.data == "main_menu")
+async def main_menu_callback(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
+    await state.clear()
+
+    await call.message.edit_text(
+        ded("""
+            *🐻 Lebowski Store*
+            *🔸 Если не появилось меню*
+            *🔸 Используйте кнопки ниже*
+        """),
+        reply_markup=start_menu_finl(),
         parse_mode="MarkdownV2"
     )
 
