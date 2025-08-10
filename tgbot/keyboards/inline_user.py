@@ -22,6 +22,18 @@ def user_profile_finl() -> InlineKeyboardMarkup:
     return keyboard.as_markup()
 
 
+
+def start_menu_finl() -> InlineKeyboardMarkup:
+    keyboard = InlineKeyboardBuilder()
+
+    keyboard.row(ikb("Купить вирты", data="buy_currency"))
+    keyboard.row(ikb("Мои покупки", data="user_purchases"))
+    keyboard.row(ikb("Отзывы", data="user_reviews"))
+    keyboard.row(ikb("Поддержка", data="support_chat"))
+
+    return keyboard.as_markup()
+
+
 def user_support_finl(support_login: str) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardBuilder()
 
@@ -82,5 +94,22 @@ def refill_method_buy_finl() -> InlineKeyboardMarkup:
         keyboard.row(ikb("🌟 Stars", data="user_refill_method:Stars"))
 
     keyboard.row(ikb("❌ Закрыть", data="close_this"))
+
+    return keyboard.as_markup()
+
+
+def order_pay_method_finl() -> InlineKeyboardMarkup:
+    keyboard = InlineKeyboardBuilder()
+
+    get_payments = Paymentsx.get()
+
+    if get_payments.status_cryptobot == "True":
+        keyboard.row(ikb("🔷 CryptoBot", data="order_pay:Cryptobot"))
+    if get_payments.status_yoomoney == "True":
+        keyboard.row(ikb("🔮 ЮMoney", data="order_pay:Yoomoney"))
+    if getattr(get_payments, 'status_stars', 'False') == "True":
+        keyboard.row(ikb("🌟 Stars", data="order_pay:Stars"))
+
+    keyboard.row(ikb("🔙 Назад", data="main_menu"))
 
     return keyboard.as_markup()

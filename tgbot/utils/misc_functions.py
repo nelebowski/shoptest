@@ -150,7 +150,7 @@ def get_items_available() -> list[str]:
 
                     if len(get_items) >= 1:
                         cache_items.append(
-                            f"{position.position_name} | {position.position_price}₽ | В наличии {len(get_items)} шт",
+                            f"{position.position_name} | {int(position.position_price)}₽ | В наличии {len(get_items)} шт",
                         )
                 else:
                     save_items.append("\n".join(cache_items))

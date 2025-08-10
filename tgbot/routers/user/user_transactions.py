@@ -1,4 +1,4 @@
-# - *- coding: utf- 8 - *-
+# -*- coding: utf-8 -*-
 from typing import Union
 
 from aiogram import Router, Bot, F
@@ -71,23 +71,38 @@ async def refill_amount_get(message: Message, bot: Bot, state: FSM, arSession: A
         )
 
     cache_message = await message.answer("<b>♻️ Подождите, платёж генерируется..</b>")
+25zm6m-codex
+    pay_amount = int(to_number(message.text))
+=======
     pay_amount = to_number(message.text)
+main
     pay_method = (await state.get_data())['here_refill_method']
     await state.clear()
 
     # Генерация платежа
     if pay_method == "Stars":
-        stars_amount = math.ceil(pay_amount / 1.3)
+25zm6m-codex
+        stars_amount = math.ceil(pay_amount / 1.45)
+=======
+        stars_amount = math.ceil(main
         pay_receipt = gen_id(10)
         await cache_message.delete()
         await bot.send_invoice(
             chat_id=message.from_user.id,
             title="Пополнение баланса",
+25zm6m-codex
+            description=ded(f"Сумма пополнения: {pay_amount}₽ (~{stars_amount}⭐)\n1⭐ = 1.45₽"),
+            payload=f"refill:{pay_receipt}:{pay_amount}",
+            provider_token="",
+            currency="XTR",
+            prices=[LabeledPrice(label="Пополнение", amount=stars_amount)],
+=======
             description=ded(f"Сумма пополнения: {pay_amount}₽ (~{stars_amount}⭐)\n1⭐ = 1.3₽"),
             payload=f"refill:{pay_receipt}",
             provider_token="",
             currency="XTR",
             prices=[LabeledPrice(label="Пополнение", amount=stars_amount * 100)],
+main
         )
         return
     elif pay_method == "Cryptobot":
@@ -224,6 +239,8 @@ async def refill_success(
     else:
         text_method = f"Unknown - {pay_method}"
 
+    pay_amount = int(pay_amount)
+
     Refillx.add(
         user_id=get_user.user_id,
         refill_comment=pay_comment,
@@ -234,8 +251,8 @@ async def refill_success(
 
     Userx.update(
         call.from_user.id,
-        user_balance=round(get_user.user_balance + pay_amount, 2),
-        user_refill=round(get_user.user_refill + pay_amount, 2),
+        user_balance=int(get_user.user_balance) + pay_amount,
+        user_refill=int(get_user.user_refill) + pay_amount,
     )
 
     await call.message.edit_text(
@@ -267,9 +284,17 @@ async def refill_stars_success(message: Message, bot: Bot, state: FSM, arSession
     if not payload.startswith("refill:"):
         return
 
+25zm6m-codex
+    parts = payload.split(":", 2)
+    if len(parts) != 3:
+        return
+    _, pay_receipt, pay_amount_str = parts
+    pay_amount = int(pay_amount_str)
+=======
     pay_receipt = payload.split(":")[1]
     stars_amount = message.successful_payment.total_amount // 100
     pay_amount = round(stars_amount * 1.3, 2)
+main
 
     await refill_success_message(
         bot=bot,
@@ -288,6 +313,11 @@ async def refill_success_message(
 ):
     get_user = Userx.get(user_id=message.from_user.id)
 
+25zm6m-codex
+    pay_amount = int(pay_amount)
+
+=======
+main
     Refillx.add(
         user_id=get_user.user_id,
         refill_comment=pay_receipt,
@@ -298,8 +328,13 @@ async def refill_success_message(
 
     Userx.update(
         message.from_user.id,
+25zm6m-codex
+        user_balance=int(get_user.user_balance) + pay_amount,
+        user_refill=int(get_user.user_refill) + pay_amount,
+=======
         user_balance=round(get_user.user_balance + pay_amount, 2),
         user_refill=round(get_user.user_refill + pay_amount, 2),
+main
     )
 
     await message.answer(

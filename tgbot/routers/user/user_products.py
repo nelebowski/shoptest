@@ -114,7 +114,7 @@ async def user_buy_open(call: CallbackQuery, bot: Bot, state: FSM, arSession: AR
 
     # Максимальное количество товаров к покупке, подстроенные под баланс пользователя
     if get_position.position_price != 0:
-        get_count = round(int(get_user.user_balance / get_position.position_price), 2)
+        get_count = int(int(get_user.user_balance) / int(get_position.position_price))
 
         if get_count > len(get_items):
             get_items = len(get_items)
@@ -135,7 +135,7 @@ async def user_buy_open(call: CallbackQuery, bot: Bot, state: FSM, arSession: AR
                 ➖➖➖➖➖➖➖➖➖➖
                 ▪️ Товар: <code>{get_position.position_name}</code>
                 ▪️ Количество: <code>1шт</code>
-                ▪️ Сумма к покупке: <code>{get_position.position_price}₽</code>
+                ▪️ Сумма к покупке: <code>{int(get_position.position_price)}₽</code>
             """),
             reply_markup=products_buy_confirm_finl(position_id, get_position.category_id, 1),
         )
@@ -150,8 +150,8 @@ async def user_buy_open(call: CallbackQuery, bot: Bot, state: FSM, arSession: AR
                 <b>🎁 Введите количество товаров для покупки</b>
                 ❕ От <code>1</code> до <code>{get_items}</code>
                 ➖➖➖➖➖➖➖➖➖➖
-                ▪️ Товар: <code>{get_position.position_name}</code> - <code>{get_position.position_price}₽</code>
-                ▪️ Ваш баланс: <code>{get_user.user_balance}₽</code>
+                ▪️ Товар: <code>{get_position.position_name}</code> - <code>{int(get_position.position_price)}₽</code>
+                ▪️ Ваш баланс: <code>{int(get_user.user_balance)}₽</code>
             """),
             reply_markup=products_return_finl(position_id, get_position.category_id),
         )
@@ -179,8 +179,8 @@ async def user_buy_count(message: Message, bot: Bot, state: FSM, arSession: ARS)
         🎁 Введите количество товаров для покупки
         ❕ От <code>1</code> до <code>{get_count}</code>
         ➖➖➖➖➖➖➖➖➖➖
-        ▪️ Товар: <code>{get_position.position_name}</code> - <code>{get_position.position_price}₽</code>
-        ▪️ Ваш баланс: <code>{get_user.user_balance}₽</code>
+        ▪️ Товар: <code>{get_position.position_name}</code> - <code>{int(get_position.position_price)}₽</code>
+        ▪️ Ваш баланс: <code>{int(get_user.user_balance)}₽</code>
     """)
 
     # Если было введено не число
@@ -191,7 +191,7 @@ async def user_buy_count(message: Message, bot: Bot, state: FSM, arSession: ARS)
         )
 
     get_count = int(message.text)
-    amount_pay = round(get_position.position_price * get_count, 2)
+    amount_pay = int(get_position.position_price * get_count)
 
     # Если товаров нет в наличии
     if len(get_items) < 1:
@@ -220,7 +220,7 @@ async def user_buy_count(message: Message, bot: Bot, state: FSM, arSession: ARS)
             ➖➖➖➖➖➖➖➖➖➖
             ▪️ Товар: <code>{get_position.position_name}</code>
             ▪️ Количество: <code>{get_count}шт</code>
-            ▪️ Сумма к покупке: <code>{amount_pay}₽</code>
+            ▪️ Сумма к покупке: <code>{int(amount_pay)}₽</code>
         """),
         reply_markup=products_buy_confirm_finl(position_id, get_position.category_id, get_count),
     )
@@ -246,10 +246,10 @@ async def user_buy_confirm(call: CallbackQuery, bot: Bot, state: FSM, arSession:
     get_category = Categoryx.get(category_id=get_position.category_id)
     get_user = Userx.get(user_id=call.from_user.id)
 
-    purchase_price = round(get_position.position_price * purchase_count, 2)
+    purchase_price = int(get_position.position_price * purchase_count)
 
     # Проверка баланса пользователя и общей суммы покупки
-    if get_user.user_balance < purchase_price:
+    if int(get_user.user_balance) < purchase_price:
         return await call.message.answer("<b>❗ На вашем счёте недостаточно средств</b>")
 
     save_items, save_len = Itemx.buy(get_items, purchase_count)
@@ -257,12 +257,12 @@ async def user_buy_confirm(call: CallbackQuery, bot: Bot, state: FSM, arSession:
 
     # Если в наличии оказалось меньше товаров, чем было запрошено
     if purchase_count != save_count:
-        purchase_price = round(get_position.position_price * save_count, 2)
+        purchase_price = int(get_position.position_price * save_count)
         purchase_count = save_count
 
     Userx.update(
         get_user.user_id,
-        user_balance=round(get_user.user_balance - purchase_price, 2),
+        user_balance=int(get_user.user_balance) - purchase_price,
     )
 
     purchase_receipt = gen_id()
@@ -271,13 +271,13 @@ async def user_buy_confirm(call: CallbackQuery, bot: Bot, state: FSM, arSession:
 
     Purchasesx.add(
         user_id=get_user.user_id,
-        user_balance_before=get_user.user_balance,
-        user_balance_after=round(get_user.user_balance - purchase_price, 2),
+        user_balance_before=int(get_user.user_balance),
+        user_balance_after=int(get_user.user_balance) - purchase_price,
         purchase_receipt=purchase_receipt,
         purchase_data=purchase_data,
         purchase_count=purchase_count,
         purchase_price=purchase_price,
-        purchase_price_one=get_position.position_price,
+        purchase_price_one=int(get_position.position_price),
         purchase_position_id=get_position.position_id,
         purchase_position_name=get_position.position_name,
         purchase_category_id=get_category.category_id,
