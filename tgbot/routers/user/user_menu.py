@@ -14,10 +14,21 @@ from tgbot.keyboards.inline_user import (
     order_pay_method_finl,
     order_bill_finl,
 )
-from tgbot.keyboards.inline_user_page import *  # buy_servers_swipe_fp, prod_item_category_swipe_fp, prod_available_swipe_fp
+from tgbot.keyboards.inline_user_page import (
+    buy_servers_swipe_fp,
+    prod_item_category_swipe_fp,
+    prod_available_swipe_fp,
+)
 from tgbot.services.api_cryptobot import CryptobotAPI
 from tgbot.services.api_yoomoney import YoomoneyAPI
-from tgbot.utils.const_functions import ded, del_message, convert_date, send_admins, ikb, gen_id
+from tgbot.utils.const_functions import (
+    ded,
+    del_message,
+    convert_date,
+    send_admins,
+    ikb,
+    gen_id,
+)
 from tgbot.utils.misc.bot_models import FSM, ARS
 from tgbot.utils.misc_functions import upload_text, get_items_available, get_categories_items
 from tgbot.utils.text_functions import open_profile_user
@@ -25,8 +36,8 @@ from tgbot.utils.text_functions import open_profile_user
 router = Router(name=__name__)
 
 # === Настройки цены ===
-PRICE_PER_MILLION_RUB = 99  # руб. за 1 млн
-STARS_RATE_RUB_PER_STAR = 1.3  # 1⭐ = 1.3₽
+PRICE_PER_MILLION_RUB = 99          # руб. за 1 млн
+STARS_RATE_RUB_PER_STAR = 1.3       # 1⭐ = 1.3₽
 
 
 # Старт покупки валюты
@@ -87,7 +98,7 @@ async def buy_currency_account(message: Message, bot: Bot, state: FSM, arSession
             Кол-во валюты: {amount} млн
             К оплате: {pay_amount}₽ (~{stars_amount}⭐)
             Выберите способ оплаты:
-        """
+            """
         ),
         reply_markup=order_pay_method_finl(),
     )
@@ -121,14 +132,10 @@ async def order_pay_call(call: CallbackQuery, bot: Bot, state: FSM, arSession: A
         return
 
     elif method == "Yoomoney":
-        bill_message, bill_link, bill_receipt = await (
-            YoomoneyAPI(bot=bot, arSession=arSession, update=call)
-        ).bill(pay_amount)
+        bill_message, bill_link, bill_receipt = await YoomoneyAPI(bot=bot, arSession=arSession, update=call).bill(pay_amount)
 
     elif method == "Cryptobot":
-        bill_message, bill_link, bill_receipt = await (
-            CryptobotAPI(bot=bot, arSession=arSession, update=call)
-        ).bill(pay_amount)
+        bill_message, bill_link, bill_receipt = await CryptobotAPI(bot=bot, arSession=arSession, update=call).bill(pay_amount)
 
     else:
         await call.answer("Неизвестный способ оплаты", show_alert=True)
@@ -137,9 +144,7 @@ async def order_pay_call(call: CallbackQuery, bot: Bot, state: FSM, arSession: A
     if bill_message:
         await call.message.edit_text(
             bill_message,
-            reply_markup=order_bill_finl(
-                bill_link, bill_receipt, method, server, account, amount, pay_amount
-            ),
+            reply_markup=order_bill_finl(bill_link, bill_receipt, method, server, account, amount, pay_amount),
         )
     else:
         await call.message.edit_text("<b>❌ Не удалось сгенерировать платёж. Попробуйте позже</b>")
@@ -302,6 +307,8 @@ async def buy_success_message(
 @router.callback_query(F.data == "user_reviews")
 async def user_reviews(call: CallbackQuery, bot: Bot, state: FSM, arSession: ARS):
     await state.clear()
+    # если у тебя start_menu_finl требует user_id — раскомментируй следующую строку и удали следующую
+    # await call.message.edit_text("<b>Отзывы пока отсутствуют</b>", reply_markup=start_menu_finl(call.from_user.id))
     await call.message.edit_text("<b>Отзывы пока отсутствуют</b>", reply_markup=start_menu_finl())
 
 
@@ -321,15 +328,12 @@ async def support_chat_message(message: Message, bot: Bot, state: FSM, arSession
             f"""
             🆘 Сообщение от <a href='tg://user?id={message.from_user.id}'>{message.from_user.full_name}</a> <code>{message.from_user.id}</code>
             {message.text}
-        """
+            """
         ),
     )
     kb = InlineKeyboardBuilder()
     kb.row(ikb("🔙 Назад", data="main_menu"))
-    await message.answer(
-        "<b>Сообщение отправлено. Можете написать ещё или вернуться назад.</b>",
-        reply_markup=kb.as_markup(),
-    )
+    await message.answer("<b>Сообщение отправлено. Можете написать ещё или вернуться назад.</b>", reply_markup=kb.as_markup())
 
 
 # Магазин (категории)
@@ -339,10 +343,7 @@ async def user_shop(message: Message, bot: Bot, state: FSM, arSession: ARS):
 
     get_categories = get_categories_items()
     if len(get_categories) >= 1:
-        await message.answer(
-            "<b>🎁 Выберите нужный вам товар</b>",
-            reply_markup=prod_item_category_swipe_fp(0),
-        )
+        await message.answer("<b>🎁 Выберите нужный вам товар</b>", reply_markup=prod_item_category_swipe_fp(0))
     else:
         await message.answer("<b>🎁 Увы, товары в данное время отсутствуют</b>")
 
@@ -394,7 +395,7 @@ async def user_purchases(call: CallbackQuery, bot: Bot, state: FSM, arSession: A
                     ▪️ Товар: <code>{purchase.purchase_position_name} | {purchase.purchase_count}шт | {int(purchase.purchase_price)}₽</code>
                     ▪️ Дата покупки: <code>{convert_date(purchase.purchase_unix)}</code>
                     ▪️ Товары: <a href='{link_items}'>кликабельно</a>
-                """
+                    """
                 )
             )
             await asyncio.sleep(0.2)

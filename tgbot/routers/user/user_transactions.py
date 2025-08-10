@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from typing import Union
+import math
 
 from aiogram import Router, Bot, F
 from aiogram.filters import StateFilter
 from aiogram.types import CallbackQuery, Message, PreCheckoutQuery, LabeledPrice
-import math
 
 from tgbot.database import Paymentsx, Refillx, Userx
 from tgbot.keyboards.inline_user import refill_bill_finl, refill_method_finl
@@ -18,9 +18,9 @@ router = Router(name=__name__)
 
 # ───────────────────────────────────────────────────────────────────────────────
 # Настройки
-MIN_REFILL_RUB = 10           # минимальная сумма пополнения, ₽
-MAX_REFILL_RUB = 150_000      # максимальная сумма пополнения, ₽
-RUB_PER_STAR = 1.3            # курс для Stars: 1⭐ = 1.3₽
+MIN_REFILL_RUB = 10            # минимальная сумма пополнения, ₽
+MAX_REFILL_RUB = 150_000       # максимальная сумма пополнения, ₽
+RUB_PER_STAR = 1.3             # курс для Stars: 1⭐ = 1.3₽
 
 # ───────────────────────────────────────────────────────────────────────────────
 # Выбор способа пополнения
@@ -60,6 +60,7 @@ async def refill_amount_get(message: Message, bot: Bot, state: FSM, arSession: A
         """))
 
     pay_amount = int(to_number(message.text))  # рубли, целое
+
     if pay_amount < MIN_REFILL_RUB or pay_amount > MAX_REFILL_RUB:
         return await message.answer(ded(f"""
             <b>❌ Неверная сумма пополнения</b>
@@ -67,7 +68,8 @@ async def refill_amount_get(message: Message, bot: Bot, state: FSM, arSession: A
             💰 Введите сумму для пополнения средств (₽)
         """))
 
-    cache_message = await message.answer("<b>♻️ Подождите, платёж генерируется..</b>")
+    cache_message = await message.answer("<b>♻️ Подождите, платёж генерируется…</b>")
+
     data = await state.get_data()
     pay_method = data.get("here_refill_method")
     await state.clear()
@@ -83,22 +85,27 @@ async def refill_amount_get(message: Message, bot: Bot, state: FSM, arSession: A
             chat_id=message.from_user.id,
             title="Пополнение баланса",
             description=ded(f"Сумма пополнения: {pay_amount}₽ (~{stars_amount}⭐)\n1⭐ = {RUB_PER_STAR}₽"),
-            # Кладём в payload и чек, и сумму в рублях — чтобы не пересчитывать обратно из ⭐
+            # кладём в payload чек и сумму в рублях
             payload=f"refill:{pay_receipt}:{pay_amount}",
-            provider_token="",                # для Stars пустая строка
-            currency="XTR",                   # Телеграм-звёзды
-            prices=[LabeledPrice(label="Пополнение", amount=stars_amount)],  # amount = кол-во ⭐ (НЕ умножать на 100)
+            provider_token="",                 # для Stars пустая строка
+            currency="XTR",                    # Телеграм-звёзды
+            # amount для XTR — количество звёзд, без умножения на 100
+            prices=[LabeledPrice(label="Пополнение", amount=stars_amount)],
         )
         return
 
     elif pay_method == "Cryptobot":
         bill_message, bill_link, bill_receipt = await CryptobotAPI(
-            bot=bot, arSession=arSession, update=cache_message
+            bot=bot,
+            arSession=arSession,
+            update=cache_message,
         ).bill(pay_amount)
 
     elif pay_method == "Yoomoney":
         bill_message, bill_link, bill_receipt = await YoomoneyAPI(
-            bot=bot, arSession=arSession, update=cache_message
+            bot=bot,
+            arSession=arSession,
+            update=cache_message,
         ).bill(pay_amount)
 
     else:
@@ -136,16 +143,16 @@ async def refill_check_yoomoney(call: CallbackQuery, bot: Bot, state: FSM, arSes
                 pay_comment=pay_receipt,
             )
         else:
-            await call.answer("❗ Ваше пополнение уже зачислено.", True, cache_time=60)
+            await call.answer("❗ Ваше пополнение уже зачислено.", show_alert=True, cache_time=60)
             await call.message.edit_reply_markup()
     elif pay_status == 1:
-        await call.answer("❗️ Не удалось проверить платёж. Попробуйте позже", True, cache_time=30)
+        await call.answer("❗️ Не удалось проверить платёж. Попробуйте позже", show_alert=True, cache_time=30)
     elif pay_status == 2:
-        await call.answer("❗️ Оплата не была найдена. Попробуйте позже", True, cache_time=5)
+        await call.answer("❗️ Оплата не была найдена. Попробуйте позже", show_alert=True, cache_time=5)
     elif pay_status == 3:
-        await call.answer("❗️ Оплата была произведена не в рублях", True, cache_time=5)
+        await call.answer("❗️ Оплата была произведена не в рублях", show_alert=True, cache_time=5)
     else:
-        await call.answer(f"❗ Неизвестная ошибка {pay_status}. Обратитесь в поддержку.", True, cache_time=5)
+        await call.answer(f"❗ Неизвестная ошибка {pay_status}. Обратитесь в поддержку.", show_alert=True, cache_time=5)
 
 # Проверка платежей — CryptoBot
 @router.callback_query(F.data.startswith("Pay:Cryptobot"))
@@ -167,17 +174,17 @@ async def refill_check_cryptobot(call: CallbackQuery, bot: Bot, state: FSM, arSe
                 pay_comment=pay_comment,
             )
         else:
-            await call.answer("❗ Ваше пополнение уже зачислено.", True, cache_time=60)
+            await call.answer("❗ Ваше пополнение уже зачислено.", show_alert=True, cache_time=60)
             await call.message.edit_reply_markup()
     elif pay_status == 1:
-        await call.answer("❗️ Не удалось проверить платёж. Попробуйте позже", True, cache_time=30)
+        await call.answer("❗️ Не удалось проверить платёж. Попробуйте позже", show_alert=True, cache_time=30)
     elif pay_status == 2:
-        await call.answer("❗️ Оплата не была найдена. Попробуйте позже", True, cache_time=5)
+        await call.answer("❗️ Оплата не была найдена. Попробуйте позже", show_alert=True, cache_time=5)
     elif pay_status == 3:
-        await call.answer("❗️ Вы не успели оплатить счёт", True, cache_time=5)
+        await call.answer("❗️ Вы не успели оплатить счёт", show_alert=True, cache_time=5)
         await call.message.edit_reply_markup()
     else:
-        await call.answer(f"❗ Неизвестная ошибка {pay_status}. Обратитесь в поддержку.", True, cache_time=5)
+        await call.answer(f"❗ Неизвестная ошибка {pay_status}. Обратитесь в поддержку.", show_alert=True, cache_time=5)
 
 # ───────────────────────────────────────────────────────────────────────────────
 # Зачисление средств (универсально)
@@ -222,8 +229,8 @@ async def refill_success(
     )
 
     await call.message.edit_text(ded(f"""
-        <b>💰 Вы пополнили баланс на сумму <code>{pay_amount}₽</code>. Удачи ❤️
-        🧾 Чек: <code>#{pay_receipt}</code></b>
+        <b>💰 Вы пополнили баланс на сумму <code>{pay_amount}₽</code>. Удачи ❤️</b>
+        🧾 Чек: <code>#{pay_receipt}</code>
     """))
 
     await send_admins(
@@ -243,20 +250,19 @@ async def stars_pre_checkout(pre_checkout_query: PreCheckoutQuery, bot: Bot, sta
     await bot.answer_pre_checkout_query(pre_checkout_query.id, ok=True)
 
 @router.message(F.successful_payment)
-async def refill_stars_success(message: Message, bot: Bot, state: FSM, arSession: ARS):
+async def stars_success_entrypoint(message: Message, bot: Bot, state: FSM, arSession: ARS):
     payload = message.successful_payment.invoice_payload
+
     if payload.startswith("refill:"):
         # payload = "refill:{receipt}:{pay_amount_rub}"
         parts = payload.split(":", 2)
         if len(parts) != 3:
             return
         _, pay_receipt, pay_amount_str = parts
-        pay_amount = int(pay_amount_str)
-
         await refill_success_message(
             bot=bot,
             message=message,
-            pay_amount=pay_amount,
+            pay_amount=int(pay_amount_str),
             pay_receipt=pay_receipt,
         )
 
@@ -266,20 +272,15 @@ async def refill_stars_success(message: Message, bot: Bot, state: FSM, arSession
         if len(parts) != 6:
             return
         _, pay_receipt, server, account, amount, pay_amount_str = parts
-        pay_amount = int(pay_amount_str)
-
         await buy_success_message(
             bot=bot,
             message=message,
-            pay_amount=pay_amount,
+            pay_amount=int(pay_amount_str),
             pay_receipt=pay_receipt,
             server=server,
             account=account,
             amount=amount,
         )
-    else:
-        # Не наш payload — игнор
-        return
 
 # ───────────────────────────────────────────────────────────────────────────────
 # Зачисление средств после оплаты звёздами (refill)
@@ -307,8 +308,8 @@ async def refill_success_message(
     )
 
     await message.answer(ded(f"""
-        <b>💰 Вы пополнили баланс на сумму <code>{pay_amount}₽</code>. Удачи ❤️
-        🧾 Чек: <code>#{pay_receipt}</code></b>
+        <b>💰 Вы пополнили баланс на сумму <code>{pay_amount}₽</code>. Удачи ❤️</b>
+        🧾 Чек: <code>#{pay_receipt}</code>
     """))
 
     await send_admins(
@@ -320,7 +321,6 @@ async def refill_success_message(
         """),
     )
 
-# ───────────────────────────────────────────────────────────────────────────────
 # (опционально) Успешная покупка через Stars — если используешь payload "buy:*"
 async def buy_success_message(
     bot: Bot,

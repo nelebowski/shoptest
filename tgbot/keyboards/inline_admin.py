@@ -19,6 +19,20 @@ def close_finl() -> InlineKeyboardMarkup:
     return keyboard.as_markup()
 
 
+# Главное меню админ панели
+def admin_menu_finl() -> InlineKeyboardMarkup:
+    keyboard = InlineKeyboardBuilder()
+
+    keyboard.row(ikb("🔑 Платежные системы", data="admin_menu:payments"))
+    keyboard.row(ikb("⚙️ Настройки", data="admin_menu:settings"))
+    keyboard.row(ikb("🔆 Общие функции", data="admin_menu:functions"))
+    keyboard.row(ikb("🎁 Управление товарами", data="admin_menu:products"))
+    keyboard.row(ikb("📊 Статистика", data="admin_menu:stats"))
+    keyboard.row(ikb("🔙 Главное меню", data="main_menu"))
+
+    return keyboard.as_markup()
+
+
 # Рассылка
 def mail_confirm_finl() -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardBuilder()
