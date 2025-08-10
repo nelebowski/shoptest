@@ -77,13 +77,13 @@ async def refill_amount_get(message: Message, bot: Bot, state: FSM, arSession: A
 
     # Генерация платежа
     if pay_method == "Stars":
-        stars_amount = math.ceil(pay_amount / 1.3)
+        stars_amount = math.ceil(pay_amount / 1.45)
         pay_receipt = gen_id(10)
         await cache_message.delete()
         await bot.send_invoice(
             chat_id=message.from_user.id,
             title="Пополнение баланса",
-            description=ded(f"Сумма пополнения: {pay_amount}₽ (~{stars_amount}⭐)\n1⭐ = 1.3₽"),
+            description=ded(f"Сумма пополнения: {pay_amount}₽ (~{stars_amount}⭐)\n1⭐ = 1.45₽"),
             payload=f"refill:{pay_receipt}:{pay_amount}",
             provider_token="",
             currency="XTR",

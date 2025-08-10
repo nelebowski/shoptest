@@ -315,3 +315,16 @@ async def functions_user_user_message_get(message: Message, bot: Bot, state: FSM
         await message.reply("<b>✅ Сообщение было успешно доставлено</b>")
 
     await open_profile_admin(bot, message.from_user.id, get_user)
+
+
+# Ответ пользователю из поддержки
+@router.message(F.text.startswith('/reply'))
+async def admin_support_reply(message: Message, bot: Bot, state: FSM, arSession: ARS):
+    parts = message.text.split(maxsplit=2)
+    if len(parts) < 3:
+        return await message.reply('<b>Использование:</b> /reply <user_id> <текст>')
+    user_id, text = parts[1], parts[2]
+    if not user_id.lstrip('-').isdigit():
+        return await message.reply('<b>Айди указан неверно</b>')
+    await bot.send_message(int(user_id), f"💬 Сообщение от поддержки:\n{text}")
+    await message.reply('<b>Ответ отправлен</b>')
